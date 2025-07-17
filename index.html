@@ -3,233 +3,78 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Monetage Mini App</title>
+    <title>Monetag Ads Integration</title>
+
+    <!-- Monetag SDK with your zone ID -->
+    <script
+      src="//libtl.com/sdk.js"
+      data-zone="9585815"
+      data-sdk="show_9585815"
+    ></script>
+
     <style>
       body {
-        font-family: Arial, sans-serif;
         background: #121212;
-        color: #fff;
-        margin: 0;
-        padding: 20px;
+        color: white;
+        font-family: Arial, sans-serif;
         text-align: center;
+        padding-top: 100px;
       }
-
-      .container {
-        max-width: 500px;
-        margin: 0 auto;
-        background: #1e1e1e;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-      }
-
       button {
-        background-color: #00b894;
+        padding: 12px 20px;
+        background: green;
         border: none;
-        padding: 10px 20px;
         color: white;
         font-size: 16px;
         border-radius: 6px;
         cursor: pointer;
-        margin: 10px 0;
+        margin: 10px;
       }
-
-      button:disabled {
-        background-color: #555;
-        cursor: not-allowed;
-      }
-
-      input,
-      select {
-        padding: 8px;
-        width: 100%;
-        margin-top: 8px;
-        margin-bottom: 12px;
-        border: none;
-        border-radius: 6px;
-      }
-
-      #withdraw-section {
-        margin-top: 20px;
-        display: none;
-        background: #2a2a2a;
-        padding: 15px;
-        border-radius: 10px;
-      }
-
-      .label {
-        font-weight: bold;
-        margin-top: 10px;
-        display: block;
-      }
-
-      #ads-progress {
-        font-size: 18px;
-        margin-top: 10px;
-        color: #00cec9;
+      button:hover {
+        background: darkorange;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h2>👋 Welcome, <span id="user-name">@exampleUser</span></h2>
+    <h1>🎁 Earn by Watching Ads</h1>
 
-      <p>📺 Watched Ads: <span id="watched-ads">0</span></p>
-      <p>💰 Earned Points: <span id="earned-points">0.00</span></p>
-      <p id="ads-progress">0%</p>
-
-      <button onclick="watchAd()">Watch Ad</button>
-      <button id="auto-ad-btn" onclick="startAutoAds()">Start Auto Ads</button>
-      <button id="stop-auto-btn" onclick="stopAutoAds()" disabled>
-        Stop Auto Ads
-      </button>
-
-      <br />
-      <button onclick="showWithdrawForm()">Withdraw Points</button>
-
-      <div id="withdraw-section">
-        <label class="label">Withdraw Amount (Points):</label>
-        <input type="number" id="withdraw-amount" placeholder="Enter amount" />
-
-        <label class="label">Payment Method:</label>
-        <select id="payment-method">
-          <option value="bKash">bKash</option>
-          <option value="Nagad">Nagad</option>
-        </select>
-
-        <label class="label">Phone Number:</label>
-        <input type="text" id="withdraw-phone" placeholder="01XXXXXXXXX" />
-
-        <button onclick="withdrawPoints()">Submit Withdrawal</button>
-        <p id="withdraw-status"></p>
-      </div>
-    </div>
+    <button onclick="watchRewardedAd()">Watch Rewarded Ad</button>
+    <button onclick="startInAppAds()">Start In-App Interstitial Ads</button>
 
     <script>
-      const MIN_WITHDRAW_POINTS = 5;
-      const ADMIN_USER_ID = 6665642603;
-      const BOT_TOKEN = "YOUR_REAL_BOT_TOKEN_HERE"; // Replace with real token (never expose in real apps)
-
-      let watchedAdsCount = 0;
-      let earnedPoints = 0.0;
-      let autoAdInterval;
-
-      const telegramUserName = "@exampleUser"; // Replace with dynamic username
-      document.getElementById("user-name").textContent = telegramUserName;
-
-      // Load saved data
-      if (localStorage.getItem("watchedAdsCount")) {
-        watchedAdsCount = parseInt(localStorage.getItem("watchedAdsCount"));
-        earnedPoints = parseFloat(localStorage.getItem("earnedPoints"));
-        updateDisplay();
-        updateProgressCircle();
-      }
-
-      function updateDisplay() {
-        document.getElementById("watched-ads").textContent = watchedAdsCount;
-        document.getElementById("earned-points").textContent =
-          earnedPoints.toFixed(2);
-      }
-
-      function watchAd() {
+      // ✅ Function to show rewarded ad
+      function watchRewardedAd() {
         if (typeof show_9585815 === "function") {
-          show_9585815().then(() => {
-            watchedAdsCount++;
-            earnedPoints += 0.5;
-            localStorage.setItem("watchedAdsCount", watchedAdsCount);
-            localStorage.setItem("earnedPoints", earnedPoints.toFixed(2));
-            updateDisplay();
-            updateProgressCircle();
-          });
+          show_9585815()
+            .then(() => {
+              // Reward logic goes here
+              alert(
+                "✅ Thanks! You have watched an ad and earned your reward."
+              );
+            })
+            .catch(() => {
+              alert("⚠ Ad failed to show.");
+            });
         } else {
-          alert("Ad is not available or show_9585815 is not defined.");
+          alert("❌ SDK not loaded properly.");
         }
       }
 
-      function updateProgressCircle() {
-        const percentage = Math.min((watchedAdsCount / 10) * 100, 100);
-        document.getElementById("ads-progress").textContent = `${percentage}%`;
-      }
-
-      function startAutoAds() {
-        autoAdInterval = setInterval(watchAd, 5000);
-        document.getElementById("auto-ad-btn").disabled = true;
-        document.getElementById("stop-auto-btn").disabled = false;
-      }
-
-      function stopAutoAds() {
-        clearInterval(autoAdInterval);
-        document.getElementById("auto-ad-btn").disabled = false;
-        document.getElementById("stop-auto-btn").disabled = true;
-      }
-
-      function showWithdrawForm() {
-        document.getElementById("withdraw-section").style.display = "block";
-      }
-
-      function withdrawPoints() {
-        const amount = parseFloat(
-          document.getElementById("withdraw-amount").value
-        );
-        const method = document.getElementById("payment-method").value;
-        const phone = document.getElementById("withdraw-phone").value;
-        const status = document.getElementById("withdraw-status");
-
-        if (isNaN(amount)) {
-          status.textContent = "Please enter a valid amount.";
-          return;
+      // ✅ Function to show automatic in-app interstitial ads
+      function startInAppAds() {
+        if (typeof show_9585815 === "function") {
+          show_9585815({
+            type: "inApp",
+            inAppSettings: {
+              frequency: 2, // Show 2 ads
+              capping: 0.1, // Within 6 minutes (0.1 hours)
+              interval: 30, // 30 sec between each ad
+              timeout: 5, // 5 sec delay before showing first ad
+              everyPage: false, // Keep session if navigating between pages
+            },
+          });
+          alert("✅ In-app interstitial ads started!");
         }
-
-        if (amount < MIN_WITHDRAW_POINTS) {
-          status.textContent = `Minimum withdrawal is ${MIN_WITHDRAW_POINTS} points.`;
-          return;
-        }
-
-        if (amount > earnedPoints) {
-          status.textContent = `Insufficient points. You have ${earnedPoints.toFixed(
-            2
-          )}.`;
-          return;
-        }
-
-        earnedPoints -= amount;
-        localStorage.setItem("earnedPoints", earnedPoints.toFixed(2));
-        updateDisplay();
-
-        const message =
-          `📤 *Withdrawal Request*\n` +
-          `👤 User: ${telegramUserName}\n` +
-          `💰 Amount: ${amount} points\n` +
-          `💳 Method: ${method}\n` +
-          `📱 Phone: ${phone}`;
-
-        sendWithdrawRequestToAdmin(message);
-
-        status.textContent = "✅ Withdrawal request sent!";
-        document.getElementById("withdraw-amount").value = "";
-        document.getElementById("withdraw-phone").value = "";
-      }
-
-      function sendWithdrawRequestToAdmin(message) {
-        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-        fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chat_id: ADMIN_USER_ID,
-            text: message,
-            parse_mode: "Markdown",
-          }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (!data.ok) {
-              console.error("Telegram error:", data);
-            }
-          })
-          .catch((err) => console.error("Fetch error:", err));
       }
     </script>
   </body>
